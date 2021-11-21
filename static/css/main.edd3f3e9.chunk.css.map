@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://src/App.css"],"names":[],"mappings":"AAAA,yCACI,EACI,kBACJ,CACJ,CAEA,EACI,0BAAyB,CAAzB,uBACJ","file":"main.edd3f3e9.chunk.css","sourcesContent":["@media only screen and (min-width: 600px) {\n    p {\n        text-align: justify;\n    }\n}\n\np {\n    margin-block-start: 0.5em;\n}"]}
