@@ -176,9 +176,7 @@ export default function App() {
                 Note that only T-LESS, TUD-L and YCBV provide real images for training.
                 * Methods do not use the available training data.
             </p>
-            <p>
-                For more details, see the paper.
-            </p>
+            <p>&nbsp;</p>
         </Container>
     );
 }

@@ -7,3 +7,15 @@
 p {
     margin-block-start: 0.5em;
 }
+
+td:nth-child(4), th:nth-child(4){
+    border-left: 1px solid rgba(224, 224, 224, 1);
+}
+
+td:nth-child(11), th:nth-child(11){
+    border-left: 1px solid rgba(224, 224, 224, 1);
+}
+
+td:nth-child(3){
+    text-align: center;
+}
