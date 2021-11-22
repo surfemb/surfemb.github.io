@@ -39,34 +39,47 @@ export default function DistributionViewer(props) {
 
     useEffect(() => {
         const canvas = canvasRef.current
-        const gl = canvas.getContext('webgl')
-        gl.getExtension('OES_texture_float')
+        // try webgl2
+        let gl = canvas.getContext('webgl2')
+        let webgl2 = true
+        if (gl === null){
+            // try webgl1 with float texture extension
+            webgl2 = false
+            gl = canvas.getContext('webgl')
+            if (gl === null || gl.getExtension('OES_texture_float') === null){
+                // abort
+                window.alert('WebGL2 nor WebGL with float texture extension is supported. Try a different browser.')
+                return
+            }
+        }
+
         let animationFrameId
 
-        const vertexShader = utils.createShader(gl, gl.VERTEX_SHADER, `
-            attribute vec4 pos;
-            varying vec2 vTextureCoord;           
+        const vertexShader = utils.createShader(gl, gl.VERTEX_SHADER, `${webgl2 ? '#version 300 es' : ''}
+            ${webgl2 ? 'in' : 'attribute'} vec4 pos;
+            ${webgl2 ? 'out' : 'varying'} vec2 vTextureCoord;           
             void main() {
                 gl_Position = pos;
                 vTextureCoord = pos.xy * vec2(0.5, -0.5) + 0.5;
             }
         `)
 
-        const fragmentShader = utils.createShader(gl, gl.FRAGMENT_SHADER, `
+        const fragmentShader = utils.createShader(gl, gl.FRAGMENT_SHADER, `${webgl2 ? '#version 300 es' : ''}
             precision mediump float;
-            varying vec2 vTextureCoord;
+            ${webgl2 ? 'in' : 'varying'} vec2 vTextureCoord;
             ${textureRange.map(i => 'uniform sampler2D keySampler' + i + ';').join('\n')}
             ${textureRange.map(i => 'uniform vec3 q' + i + ';').join('\n')}
             uniform float a;
             uniform float alpha;
+            ${webgl2 ? 'out vec4 outCol;' : ''}
             void main() {
-                ${textureRange.map(i => 'vec3 k' + i + '=texture2D(keySampler' + i + ',vTextureCoord).xyz;').join('\n')}
+                ${textureRange.map(i => 'vec3 k' + i + '=texture' + (webgl2 ? '' : '2D') + '(keySampler' + i + ',vTextureCoord).xyz;').join('\n')}
                 vec3 dpv = ${textureRange.map(i => 'q' + i + '*k' + i).join('+')};
                 float dp = dpv.x + dpv.y + dpv.z;
                 float v = pow(exp(dp - a), 0.5) * alpha;
                 if (${textureRange.map(i => ['x', 'y', 'z'].map(x => 'k' + i + '.' + x + '==0.').join('&&')).join('&&')})
                     v = 0.;
-                gl_FragColor = vec4(v, 0., 0., v);
+                ${webgl2 ? 'outCol' : 'gl_FragColor'} = vec4(v, 0., 0., v);
             }
         `)
 
@@ -89,7 +102,7 @@ export default function DistributionViewer(props) {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
             requests.push(utils.loadFloat32Array(urlRoot + '-keys-' + i + '.bin', data => {
                 gl.bindTexture(gl.TEXTURE_2D, tex)
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 224, 224, 0, gl.RGB, gl.FLOAT, data)
+                gl.texImage2D(gl.TEXTURE_2D, 0, webgl2 ? gl.RGB32F : gl.RGB, 224, 224, 0, gl.RGB, gl.FLOAT, data)
             }))
         })
 
@@ -152,7 +165,7 @@ export default function DistributionViewer(props) {
 
         return () => {
             window.cancelAnimationFrame(animationFrameId)
-            for (const request of requests){
+            for (const request of requests) {
                 request.abort()
             }
         }
