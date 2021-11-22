@@ -37,36 +37,34 @@ export default function DistributionViewer(props) {
 
     useEffect(() => {
         const canvas = canvasRef.current
-        const gl = canvas.getContext('webgl2')
-        //gl.getExtension('OES_texture_float')
-        //TODO: change back to webgl with OES texture float support to support IOS
+        const gl = canvas.getContext('webgl')
+        gl.getExtension('OES_texture_float')
         let animationFrameId
 
-        const vertexShader = utils.createShader(gl, gl.VERTEX_SHADER, `#version 300 es
-            in vec4 pos;
-            out vec2 vTextureCoord;           
+        const vertexShader = utils.createShader(gl, gl.VERTEX_SHADER, `
+            attribute vec4 pos;
+            varying vec2 vTextureCoord;           
             void main() {
                 gl_Position = pos;
                 vTextureCoord = pos.xy * vec2(0.5, -0.5) + 0.5;
             }
         `)
 
-        const fragmentShader = utils.createShader(gl, gl.FRAGMENT_SHADER, `#version 300 es
+        const fragmentShader = utils.createShader(gl, gl.FRAGMENT_SHADER, `
             precision mediump float;
-            in vec2 vTextureCoord;
+            varying vec2 vTextureCoord;
             ${textureRange.map(i => 'uniform sampler2D keySampler' + i + ';').join('\n')}
             ${textureRange.map(i => 'uniform vec3 q' + i + ';').join('\n')}
             uniform float a;
             uniform float alpha;
-            out vec4 outCol;
             void main() {
-                ${textureRange.map(i => 'vec3 k' + i + '=texture(keySampler' + i + ',vTextureCoord).xyz;').join('\n')}
+                ${textureRange.map(i => 'vec3 k' + i + '=texture2D(keySampler' + i + ',vTextureCoord).xyz;').join('\n')}
                 vec3 dpv = ${textureRange.map(i => 'q' + i + '*k' + i).join('+')};
                 float dp = dpv.x + dpv.y + dpv.z;
                 float v = pow(exp(dp - a), 0.5) * alpha;
                 if (${textureRange.map(i => ['x', 'y', 'z'].map(x => 'k' + i + '.' + x + '==0.').join('&&')).join('&&')})
                     v = 0.;
-                outCol = vec4(v, 0., 0., v);
+                gl_FragColor = vec4(v, 0., 0., v);
             }
         `)
 
@@ -89,7 +87,7 @@ export default function DistributionViewer(props) {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
             utils.loadFloat32Array(urlRoot + '-keys-' + i + '.bin', data => {
                 gl.bindTexture(gl.TEXTURE_2D, tex)
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB32F, 224, 224, 0, gl.RGB, gl.FLOAT, data)
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 224, 224, 0, gl.RGB, gl.FLOAT, data)
             })
         })
 
