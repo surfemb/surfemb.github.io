@@ -104,10 +104,10 @@ export default function App() {
             </p>
             <Section>Estimated Correspondence Distributions</Section>
             <p>
-                Hover over the input image (left) or query image (middle) to see the estimated 3D correspondence
+                Hover over the input image (left) or query image (middle) to see the estimated correspondence
                 distribution.
                 Drag the keys (right) to rotate them, or drag the slider to interpolate between keys'
-                object coordinates or UMAP projection.
+                object coordinates and UMAP projection.
             </p>
             <p>
                 Interesting examples include discrete rotational symmetry:

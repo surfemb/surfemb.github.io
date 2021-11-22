@@ -16,9 +16,11 @@ export default function DistributionViewer(props) {
     let max_act = null
     let alpha = null
 
-    utils.loadFloat32Array(urlRoot + '-queries.bin', data => {
+    const requests = []
+
+    requests.push(utils.loadFloat32Array(urlRoot + '-queries.bin', data => {
         queries = data;
-    })
+    }))
 
     let cursorPos = null;
 
@@ -85,10 +87,10 @@ export default function DistributionViewer(props) {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-            utils.loadFloat32Array(urlRoot + '-keys-' + i + '.bin', data => {
+            requests.push(utils.loadFloat32Array(urlRoot + '-keys-' + i + '.bin', data => {
                 gl.bindTexture(gl.TEXTURE_2D, tex)
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 224, 224, 0, gl.RGB, gl.FLOAT, data)
-            })
+            }))
         })
 
         const posLoc = gl.getAttribLocation(program, 'pos')
@@ -148,7 +150,12 @@ export default function DistributionViewer(props) {
         };
         render()
 
-        return () => window.cancelAnimationFrame(animationFrameId)
+        return () => {
+            window.cancelAnimationFrame(animationFrameId)
+            for (const request of requests){
+                request.abort()
+            }
+        }
     })
 
     const containerStyle = {position: 'relative', width: 224, height: 224, borderRadius: 10, overflow: 'hidden'}

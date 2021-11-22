@@ -3,8 +3,12 @@ export function loadFloat32Array(url, onload) {
     oReq.open("GET", url, true)
     //oReq.setRequestHeader('Cache-Control', 'no-cache') // TODO: remove
     oReq.responseType = "arraybuffer"
-    oReq.onload = () => onload(new Float32Array(oReq.response))
+    oReq.onload = () => {
+        if (oReq.status === 200)
+            onload(new Float32Array(oReq.response))
+    }
     oReq.send(null)
+    return oReq
 }
 
 function cumulativeOffset(element) {

@@ -39,6 +39,7 @@ export default class KeyViewer extends React.Component {
         this.lastY = null
         this.allowRotation = false
         this.gl = null
+        this.request = null
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -48,6 +49,10 @@ export default class KeyViewer extends React.Component {
     componentWillUnmount() {
         if (this.animationFrameId !== null)
             window.cancelAnimationFrame(this.animationFrameId)
+        if (this.request !== null){
+            this.request.abort()
+            this.request = null
+        }
     }
 
     componentDidMount() {
@@ -91,7 +96,7 @@ export default class KeyViewer extends React.Component {
         gl.bindBuffer(gl.ARRAY_BUFFER, dataBuffer)
         let vertexCount = 0
 
-        utils.loadFloat32Array(this.props.urlRoot + '-keydata.bin', data => {
+        this.request = utils.loadFloat32Array(this.props.urlRoot + '-keydata.bin', data => {
             gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
             vertexCount = data.length / 9
         })
