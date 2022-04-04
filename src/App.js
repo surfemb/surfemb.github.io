@@ -89,6 +89,17 @@ export default function App() {
                     for Object Pose Estimation with Learnt Surface Embeddings
                 </Typography>
             </Box>
+            <Typography textAlign='center'>
+                Rasmus Laurvig Haugaard, Anders Glent Buch
+            </Typography>
+            <Typography textAlign='center'>
+                SDU Robotics, University of Southern Denmark
+            </Typography>
+            <Typography textAlign='center'>
+                CVPR 2022<span> | </span>
+                <a href="https://github.com/rasmushaugaard/surfemb">CODE</a><span> | </span>
+                <a href="https://arxiv.org/abs/2111.13489">PDF</a>
+            </Typography>
             <Section>Abstract</Section>
             <p>
                 We present an approach to learn dense, continuous 2D-3D correspondence distributions over the surface
